@@ -2,3 +2,6 @@
 /.venv
 
 src/credentials.json
+files/credentials.json
+files/token.json
+files/~$timetable.xlsx
