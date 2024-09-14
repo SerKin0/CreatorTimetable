@@ -11,7 +11,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 def convert_to_iso_format(year, month, day, hour, minute, second, timezone_offset_hours: int = 3):
     """
-  Преобразует часы, минуты, секунды и часовой пояс в формат ISO 8601.
+  Преобразует дату и время в формат ISO 8601.
 
   Args:
     year: Год.
@@ -20,15 +20,19 @@ def convert_to_iso_format(year, month, day, hour, minute, second, timezone_offse
     hour: Час.
     minute: Минута.
     second: Секунда.
-    timezone_offset_hours: Часовой пояс в часах.
+    timezone_offset_hours: Смещение часового пояса от UTC в часах.
 
   Returns:
-    Строка в формате ISO 8601.
+    Строка с датой и временем в формате ISO 8601.
   """
+
+    # Создаем объект datetime
     dt = datetime(year, month, day, hour, minute, second)
-    timezone_offset = timedelta(hours=timezone_offset_hours)
-    dt_with_timezone = dt + timezone_offset
-    return dt_with_timezone.isoformat()
+
+    # Форматируем дату и время в формате ISO 8601
+    iso_format = dt.isoformat() + f"-{timezone_offset_hours:02}:00"
+
+    return iso_format
 
 
 def format_event_time(start, end):
@@ -64,7 +68,8 @@ class Calendar:
                     time_zone: str = "Europe/Moscow",
                     repeat_type: str = "none",  # "daily", "weekly", "monthly", "yearly", "none"
                     count_repeat: int = 0,  # Количество повторений
-                    until_date: str = None,  # Дата окончания повторения
+                    interval: int = 0,
+                    until_date: tuple = None,  # Дата окончания повторения
                     recurrence: str = "",  # Пользовательский параметр повторения
                     calendar: str = "primary",
                     print_link: bool = False
@@ -81,6 +86,7 @@ class Calendar:
             repeat_type: Интервал повторений события по дням ("daily"), неделям ("weekly"), месяцам ("monthly"), годам
             ("yearly"), либо без повторений
             count_repeat: Количество повторений
+            interval: Интервал времени между мероприятиями. ! Работает вместе с repeat_type !
             until_date: Дата окончания повторения. Пример: (2024, 12, 9, 8, 0, 0) - год, месяц, день, час, мин., сек.
             recurrence: Пользовательский параметр повторения
             calendar:
@@ -113,9 +119,12 @@ class Calendar:
                 recurrence_rule = f"RRULE:FREQ={repeat_type.upper()};"
                 if until_date:
                     recurrence_rule += f"UNTIL={datetime(*until_date).strftime('%Y%m%dT%H%M%S')}Z"
+                    if interval != 0:
+                        recurrence_rule += f";INTERVAL={interval}"
                 elif count_repeat > 0:
                     recurrence_rule += f"COUNT={count_repeat}"
                 event_data["recurrence"] = [recurrence_rule]
+        print(event_data)
         event = self.service.events().insert(calendarId=calendar, body=event_data).execute()
         if print_link:
             print('Событие создано: %s' % (event.get('htmlLink')))

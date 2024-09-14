@@ -70,8 +70,8 @@ for monday in tqdm(mondays):
     is_even = week_start.isocalendar().week % 2 == 0
 
     # Устанавливаем расписание на соответствующую неделю
-    for day_name, day_schedule in tqdm(schedule.items()):
-        for pair in tqdm(day_schedule):
+    for day_name, day_schedule in schedule.items():
+        for pair in day_schedule:
             # Если пара свободна, то пропускаем и даже не рассматриваем
             if not pair["free"]:
                 continue
@@ -98,6 +98,11 @@ for monday in tqdm(mondays):
             event_start = week_start + timedelta(days=list(schedule.keys()).index(day_name))
             event_start_time = datetime.strptime(event_start_time_str, "%H:%M:%S").time()
             event_end_time = datetime.strptime(event_end_time_str, "%H:%M:%S").time()
+            print(f"""
+            {event_start=} {event_start}
+            {event_start_time=} {event_start_time}
+            {event_end_time=} {event_end_time}
+            """)
 
             event_data["start"] = {
                 'dateTime': datetime.combine(event_start, event_start_time).strftime('%Y-%m-%dT%H:%M:%S') + '+03:00',
@@ -111,6 +116,7 @@ for monday in tqdm(mondays):
             event_data["recurrence"] = [
                 'RRULE:FREQ=WEEKLY;COUNT=2'  # Указывает на еженедельное повторение в течение 4 недель
             ]
+            print(event_data)
 
             # Создаем событие в календаре
-            create_event('primary', event_data)
+            # create_event('primary', event_data)
