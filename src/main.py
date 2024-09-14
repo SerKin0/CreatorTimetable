@@ -1,8 +1,9 @@
 import os.path
 import time
+from datetime import datetime
 
 from settings import timetable_json_path, timetable_xlsx_path
-from convertor import convertor_xlsx_to_json
+from src.convertor import xlsx2json
 
 # Проверяем, есть ли готовый json файл с расписанием
 if not os.path.exists(timetable_json_path):
@@ -12,28 +13,16 @@ if not os.path.exists(timetable_json_path):
     if not os.path.exists(timetable_xlsx_path):
         print(f"В указанной директории ({timetable_json_path}) не был найден файл с расписанием формата xlsx.")
         exit()
-
         # Преобразуем таблицу Excel в JSON
-    convertor_xlsx_to_json(timetable_xlsx_path, timetable_json_path)
+    xlsx2json(timetable_xlsx_path, timetable_json_path)
 
+start_time = tuple(map(int, input("Введите дату, с которой начнется создание расписания. "
+                   "Заполнить в следующей форме: 2024 12 31\n>>> ").split()))
+end_time = tuple(map(int, input("Введите дату, до которой начнется создание расписания. "
+                 "Заполнить в следующей форме: 2024 12 31\n>>> ").split()))
 
-year = int(input("\n\nВведите год (если в этом году, то можете не заполнять): "))
-# Если год не вели, то вводим нынешний
-if not year:
-    year = time.strftime("%Y")
+print(datetime.combine(datetime(*start_time), datetime.min.time()).isocalendar().week % 2 == 0)
+print(datetime.combine(datetime(*end_time), datetime.min.time()).isocalendar().week % 2 == 0)
 
-print("""1 - Январь
-2 - Февраль
-3 - Март
-4 - Апрель
-5 - Май
-6 - Июнь
-7 - Июль
-8 - Август
-9 - Сентябрь
-10 - Октябрь
-11 - Ноябрь
-12 - Декабрь
-""")
-month = int(input("Введите месяц (1-12): "))
-
+print(datetime(*start_time).weekday())
+print(datetime(*end_time).weekday())

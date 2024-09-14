@@ -1,61 +1,42 @@
 import json
-import math
-import pandas as pd
+import os.path
 
-from src.settings import start_points, time, count_lessons
-
-
-def excel_to_list(file_path):
-    # Чтение Excel файла в DataFrame
-    df = pd.read_excel(file_path)
-    # Преобразование DataFrame в список списков
-    data_as_list = df.values.tolist()
-    return data_as_list
+from openpyxl.reader.excel import load_workbook
 
 
-def check_nan(n):
-    return (type(n) is str) or (not math.isnan(n))
+def xlsx2json(path_excel: str, path_json: str):
+    if not os.path.exists(path_excel):
+        return False
+    workbook = load_workbook(path_excel)
+    result = {}
+    for day in workbook.get_sheet_names():
+        result[day] = []
+        table = workbook[day]
+        for number in range(1, table.max_row - 1):
+            temp = {"number": number}
+            if (table.cell(2 + number, 2).value is None) and (table.cell(2 + number, 7).value is None):
+                temp["free"] = False
+                result[day].append(temp)
+                continue
+            temp["free"] = True
+            temp["left"] = {
+                "summary": table.cell(2 + number, 2).value,
+                "location": table.cell(2 + number, 3).value,
+                "description": table.cell(2 + number, 4).value,
+                "start": table.cell(2 + number, 5).value,
+                "end": table.cell(2 + number, 6).value,
+            }
+            temp["right"] = {
+                "summary": table.cell(2 + number, 7).value,
+                "location": table.cell(2 + number, 8).value,
+                "description": table.cell(2 + number, 9).value,
+                "start": table.cell(2 + number, 10).value,
+                "end": table.cell(2 + number, 11).value,
+            }
+            result[day].append(temp)
 
-
-def convertor_xlsx_to_json(path_xlsx: str, path_json: str) -> bool:
-    data_list = excel_to_list(path_xlsx)
-    subjects = {}
-
-    for week in start_points.keys():
-        pos = start_points[week]
-        lessons_on_day = []
-        for number_lesson in range(count_lessons):
-            flag = False
-            row = pos[0] + 3 * number_lesson
-            temp = {"number": number_lesson + 1}
-            if check_nan(data_list[row][pos[1]]):
-                temp["left"] = {
-                    "summary": data_list[row][pos[1]],
-                    "location": data_list[row + 1][pos[1]],
-                    "description": data_list[row + 2][pos[1]],
-                    "start": time[f'{number_lesson + 1}_start'],
-                    "end": time[f'{number_lesson + 1}_end']
-                }
-                flag = True
-            if check_nan(data_list[row][pos[1] + 1]):
-                temp["right"] = {
-                    "summary": data_list[row][pos[1] + 1],
-                    "location": data_list[row + 1][pos[1] + 1],
-                    "description": data_list[row + 2][pos[1] + 1],
-                    "start": time[f'{number_lesson + 1}_start'],
-                    "end": time[f'{number_lesson + 1}_end']
-                }
-                flag = True
-            temp['free'] = flag
-            lessons_on_day += [temp]
-            print(temp)
-        subjects[week] = lessons_on_day
-
-    print(subjects)
-    # Преобразуем словарь в JSON-строку
-    json_string = json.dumps(subjects)
-
-    # Сохраняем JSON-строку в файл
-    with open(path_json, "w", encoding="utf-8") as f:
-        f.write(json_string)
+    # Создание json файла
+    json_string = json.dumps(result)
+    with open(path_json, "w", encoding="utf-8") as file:
+        file.write(json_string)
     return True
