@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 import os
 from googleapiclient.discovery import build
 
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+from src.settings import SCOPES
 
 
 def convert_to_iso_format(year, month, day, hour, minute, second, timezone_offset_hours: int = 3):

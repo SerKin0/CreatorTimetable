@@ -31,4 +31,3 @@ timetable_json_path = '../files/timetable.json'
 timetable_xlsx_path = "../files/timetable.xlsx"
 credentials_path = "../files/credentials.json"
 token_path = '../files/token.json'
-

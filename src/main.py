@@ -1,4 +1,3 @@
-import os.path
 from datetime import datetime, timedelta
 
 from settings import timetable_json_path, timetable_xlsx_path, token_path, credentials_path, days_in_week
