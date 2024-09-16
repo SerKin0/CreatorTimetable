@@ -30,7 +30,7 @@ def convert_to_iso_format(year, month, day, hour, minute, second, timezone_offse
     dt = datetime(year, month, day, hour, minute, second)
 
     # Форматируем дату и время в формате ISO 8601
-    iso_format = dt.isoformat() + f"-{timezone_offset_hours:02}:00"
+    iso_format = dt.isoformat() + f"+{timezone_offset_hours:02}:00"
 
     return iso_format
 
